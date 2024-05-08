@@ -1,5 +1,7 @@
 name: PR notification
 on:
+  issues:
+    types: [opened ]
   push : 
   pull_request:
     types: [ opened , reopened ]
