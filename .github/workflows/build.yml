@@ -9,10 +9,6 @@ jobs:
     env:
       API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
     steps:
-      jobs:
-  check_mergeable_state:
-    runs-on: ubuntu-latest
-    steps:
       - name: Extract PR numbers and merge_commit_shas
         id: extract
         run: |
