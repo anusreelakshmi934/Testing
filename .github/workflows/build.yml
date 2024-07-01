@@ -36,12 +36,12 @@ jobs:
             fi
           done
 
-          pr_details_array=$(echo "$pr_infos" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
-          # pr_details_array=$(echo "$pr_infos" | jq -r '
-          #   .[]
-          #   | select(.draft == false and .mergeable_state == "clean")
-          #   | "\(env.API_URL)/\(.number)"
-          # ')
+          # pr_details_array=$(echo "$pr_infos" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
+          pr_details_array=$(echo "$pr_infos" | jq -nc '
+            .[]
+            | select(.draft == false and .mergeable_state == "clean")
+            | "\(env.API_URL)/\(.number)"
+          ')
           
           echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
           
