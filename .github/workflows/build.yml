@@ -36,12 +36,6 @@ jobs:
             fi
           done
 
-
-      - name: Fetch PR Details
-        run: |
-          # Fetch PR details from the GitHub API
-          pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${{ env.API_URL }}")
-          
           pr_details_array=$(echo "$pr_infos" | jq -r '
             .[]
             | select(.draft == false and .mergeable_state == "clean")
@@ -49,6 +43,7 @@ jobs:
           ')
           
           echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
+          
 
   # Run the LTI Tests against each open lsp4ij PRs
   call-build-workflow-for-each-merge-commit-sha:
