@@ -16,6 +16,10 @@ jobs:
           # Fetch PR details from the GitHub API
           pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${{ env.API_URL }}")
           
+          # Output the raw PR info for debugging
+          echo "Raw PR info:"
+          echo "$pr_infos" | jq '.'
+          
           # Extract PR numbers and merge_commit_sha values, excluding draft pull requests
           pr_details=$(echo "$pr_infos" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
           
