@@ -26,6 +26,8 @@ jobs:
           pr_details=$(echo "$pr_details" | jq -nc '[inputs | {number: .number, sha: .sha}]')
           echo "pr_details=$pr_details" >> $GITHUB_OUTPUT
 
+          echo "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"'
+
       - name: Fetch Pull Requests
         id: fetch_prs
         run: |
