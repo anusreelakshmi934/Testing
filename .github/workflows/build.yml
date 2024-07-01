@@ -30,6 +30,7 @@ jobs:
         id: fetch_prs
         run: |
           PR_URL=$(echo "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"')
+          echo "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"'
           echo "PR_URL"
 
 
