@@ -13,8 +13,12 @@ jobs:
         shell: bash
         id: extract
         run: |
-          pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "${{ env.API_URL }}")
+          # Fetch PR details from the GitHub API
+          pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${{ env.API_URL }}")
+          
+          # Output the raw PR info for debugging
+          echo "Raw PR info:"
+          echo "$pr_infos" | jq '.'
           
           # Extract PR numbers and merge_commit_sha values, excluding draft pull requests
           pr_details=$(echo "$pr_infos" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
@@ -22,18 +26,19 @@ jobs:
           # Print the PR number and corresponding merge commit sha
           echo "PR number and merge commit sha:"
           echo "$pr_details" | jq -r '. | "PR #\(.number): \(.sha)"'
-
+          
           # Check if any of the PR URLs contain "mergeable_state": "dirty"
           echo "Checking mergeable state of PRs..."
           pr_urls=$(echo "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"')
           for url in $pr_urls; do
-            pr_details=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
-            mergeable_state=$(echo "$pr_details" | jq -r '.mergeable_state')
+            pr_detail=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
+            mergeable_state=$(echo "$pr_detail" | jq -r '.mergeable_state')
             if [ "$mergeable_state" == "dirty" ]; then
-              echo "##[warning]PR $(echo "$pr_details" | jq -r '.number') has a dirty mergeable state."
+              pr_number=$(echo "$pr_detail" | jq -r '.number')
+              echo "##[warning] PR #$pr_number has a dirty mergeable state."
             fi
           done
           
           # Create a JSON array string of PR numbers and SHAs
-          pr_details=$(echo "$pr_infos" | jq -nc '[inputs | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
-          echo "pr_details=$pr_details" >> $GITHUB_OUTPUT
+          pr_details_array=$(echo "$pr_infos" | jq -nc 'inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
+          echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
