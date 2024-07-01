@@ -39,7 +39,7 @@ jobs:
           pr_details_array=$(echo "$pr_infos" | jq -r '
             .[]
             | select(.draft == false and .mergeable_state == "clean")
-            | "\($env.API_URL)/\(.number)"
+            | "\(env.API_URL)/\(.number)"
           ')
           
           echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
