@@ -40,7 +40,7 @@ jobs:
           done
       
           # Create a JSON array of PR numbers and SHAs
-          pr_details_array=$(echo "$clean_pr" | jq -s '.')
+          pr_details_array=$(echo "$clean_pr" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
           echo "::set-output name=pr_details::$pr_details_array"
           
 
