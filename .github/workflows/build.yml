@@ -39,7 +39,7 @@ jobs:
           echo "Creating JSON array string of PR numbers and SHAs..."
 
           # Fetch PR details and construct JSON array filtering by draft status and mergeable state
-          pr_details=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${{ env.API_URL }}/pulls")
+          pr_details=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${{ env.API_URL }}")
           filtered_prs=$(echo "$pr_details" | jq -r '
             .[]
             | select(.draft == false and .mergeable_state == "clean")
