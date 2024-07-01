@@ -13,8 +13,9 @@ jobs:
         shell: bash
         id: extract
         run: |
-          pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "${{ env.API_URL }}")
+          # Fetch PR details from the GitHub API
+          pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${{ env.API_URL }}")
+          
           # Extract PR numbers and merge_commit_sha values, excluding draft pull requests
           pr_details=$(echo "$pr_infos" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
           
