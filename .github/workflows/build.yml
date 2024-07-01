@@ -40,14 +40,14 @@ jobs:
 
           # Fetch PR details and construct JSON array filtering by draft status and mergeable state
           pr_details=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${{ env.API_URL }}")
-          filtered_prs=$(echo "$pr_details" | jq -r '
+          pr_details_array=$(echo "$pr_details" | jq -r '
             .[]
             | select(.draft == false and .mergeable_state == "clean")
             | "\(env.API_URL)/\(.number)"
           ')
           
           # Output the JSON array string
-          echo "::set-output name=filtered_prs::$filtered_prs"
+          echo "::set-output name=pr_details::$pr_details_array"
 
   # Run the LTI Tests against each open lsp4ij PRs
   call-build-workflow-for-each-merge-commit-sha:
