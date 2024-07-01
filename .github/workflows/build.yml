@@ -1,6 +1,6 @@
 name: PR notification
 on:
-  push : 
+  push:
 jobs:
   fetch_all_pull_request_shas:
     runs-on: ubuntu-latest
@@ -16,7 +16,6 @@ jobs:
           # Fetch PR details from the GitHub API
           pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${{ env.API_URL }}")
           
-          
           # Extract PR numbers and merge_commit_sha values, excluding draft pull requests
           pr_details=$(echo "$pr_infos" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
           
@@ -25,8 +24,8 @@ jobs:
           echo "$pr_details" | jq -r '. | "PR #\(.number): \(.sha)"'
        
           # Create a JSON array string of PR numbers and SHAs
-          pr_details_array=$(echo "$pr_infos" | jq -nc 'inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
-          echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
+          pr_details_array=$(echo "$pr_infos" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
+          echo "::set-output name=pr_details::$pr_details_array"  # Output pr_details_array directly
 
           # Check if any of the PR URLs contain "mergeable_state": "dirty"
           echo "Checking mergeable state of PRs..."
