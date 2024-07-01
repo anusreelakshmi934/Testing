@@ -16,9 +16,6 @@ jobs:
           # Fetch PR details from the GitHub API
           pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${{ env.API_URL }}")
           
-          # Output the raw PR info for debugging
-          echo "Raw PR info:"
-          echo "$pr_infos" | jq '.'
           
           # Extract PR numbers and merge_commit_sha values, excluding draft pull requests
           pr_details=$(echo "$pr_infos" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
@@ -26,11 +23,10 @@ jobs:
           # Print the PR number and corresponding merge commit sha
           echo "PR number and merge commit sha:"
           echo "$pr_details" | jq -r '. | "PR #\(.number): \(.sha)"'
-          echo "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"'
        
           # Create a JSON array string of PR numbers and SHAs
-          pr_details=$(echo "$pr_details" | jq -nc '[inputs | {number: .number, sha: .sha}]')
-          echo "pr_details=$pr_details" >> $GITHUB_OUTPUT
+          pr_details_array=$(echo "$pr_infos" | jq -nc 'inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
+          echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
 
           # Check if any of the PR URLs contain "mergeable_state": "dirty"
           echo "Checking mergeable state of PRs..."
