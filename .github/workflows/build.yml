@@ -40,7 +40,7 @@ jobs:
 
           
             # Fetch the PR details to get the mergeable status
-            pr_info=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"'
+            pr_info=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" echo "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"'
             mergeable_state=$(echo "$pr_info" | jq -r '.mergeable_state')
             
             if [ "$mergeable_state" == "dirty" ]; then
