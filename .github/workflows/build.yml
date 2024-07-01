@@ -26,12 +26,8 @@ jobs:
           # Create a JSON array string of PR numbers and SHAs
           pr_details_array=$(echo "$pr_infos" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
           echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
-          
-          # # Create a JSON array string of PR numbers and SHAs
-          # pr_details_array=$(echo "$pr_infos" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
-          # echo "::set-output name=pr_details::$pr_details_array"  # Output pr_details_array directly
 
-          # Check if any of the PR URLs contain "mergeable_state": "dirty"
+          # Check if any of the PR contain merge conflicts
           echo "Checking mergeable state of PRs..."
           pr_urls=$(echo "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"')
           for url in $pr_urls; do
@@ -39,6 +35,6 @@ jobs:
             mergeable_state=$(echo "$pr_detail" | jq -r '.mergeable_state')
             if [ "$mergeable_state" == "dirty" ]; then
               pr_number=$(echo "$pr_detail" | jq -r '.number')
-              echo "##[warning] PR #$pr_number has a dirty mergeable state."
+              echo "##[warning] PR #$pr_number has a merge conflict."
             fi
           done
