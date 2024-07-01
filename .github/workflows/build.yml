@@ -28,6 +28,7 @@ jobs:
 
       - name: Set PR number
         run: echo "PR_NUMBER=$(jq -r '.number' <<< "$pr_details")" >> $GITHUB_ENV
+             echo "$pr_details"
       
       - name: Check for merge conflicts
         shell: bash
