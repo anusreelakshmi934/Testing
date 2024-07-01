@@ -57,7 +57,7 @@ jobs:
           - runtime: windows
             os: windows-latest
             reportName: windows-test-report
-        pr_details: ${{ fromJson(needs.fetch_all_pull_request_shas.outputs.pr_details) }}
+        pr_details: ${{ fromJson(needs.fetch_all_pull_request_shas.outputs.pr_details_array) }}
     name: Run LTI tests for PR #${{ matrix.pr_details_array.number }}
     steps:
       - name: 'Checkout lsp4ij'
