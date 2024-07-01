@@ -37,12 +37,15 @@ jobs:
           echo "$pr_details" | jq -c '.[]' | while read pr; do
             pr_number=$(echo "$pr" | jq -r '.number')
             pr_url="${{ env.API_URL }}/$pr_number"
+
+            echo "$pr_url"
+
             
             # Fetch the PR details to get the mergeable status
             pr_info=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$pr_url")
-            mergeable=$(echo "$pr_info" | jq -r '.mergeable')
+            mergeable_state=$(echo "$pr_info" | jq -r '.mergeable_state')
             
-            if [ "$mergeable" == "false" ]; then
+            if [ "$mergeable_state" == "dirty" ]; then
               echo "Warning: PR #$pr_number contains a merge conflict!"
             fi
           done
