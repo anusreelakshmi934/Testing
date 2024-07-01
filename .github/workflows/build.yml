@@ -45,7 +45,7 @@ jobs:
           ')
           
           # Output the JSON array string
-          echo "::set-output name=pr_details::$pr_details_array"
+          echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
 
   # Run the LTI Tests against each open lsp4ij PRs
   call-build-workflow-for-each-merge-commit-sha:
