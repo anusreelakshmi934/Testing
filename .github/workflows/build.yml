@@ -32,13 +32,16 @@ jobs:
           API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
         run: |
           # Fetch the PR details to get the mergeable status
-          pr_info=$(echo "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"')
+          pr_info=$(curl -s "${{ env.API_URL }}/$pr_number")
           mergeable_state=$(echo "$pr_info" | jq -r '.mergeable_state')
+          
+          echo "Mergeable state for PR #$pr_number: $mergeable_state"
           
           if [ "$mergeable_state" == "dirty" ]; then
             echo "Warning: PR #$pr_number contains a merge conflict!"
           else
             echo "PR #$pr_number is mergeable with state: $mergeable_state"
           fi
+
 
 
