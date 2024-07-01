@@ -36,7 +36,7 @@ jobs:
             fi
           done
 
-          pr_details_array=$(echo "$pr_detail" | jq -c '[.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
+          pr_details_array=$(echo "$pr_detail" | jq -nc '[.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
           # pr_details_array=$(echo "$pr_infos" | jq -nc '
           #   .[]
           #   | select(.draft == false and .mergeable_state == "clean")
