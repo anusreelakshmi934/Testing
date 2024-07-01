@@ -9,30 +9,27 @@ jobs:
     env:
       API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
     steps:
-      - name: Extract PR numbers and merge commit shas
+      jobs:
+  check_mergeable_state:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract PR numbers and merge_commit_shas
         id: extract
         run: |
-          pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "${{ env.API_URL }}")
+          pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${{ env.API_URL }}")
 
           # Extract PR numbers and merge_commit_sha values, excluding draft pull requests
-          pr_details=$(echo "$pr_infos" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
+          pr_details=$(echo "$pr_infos" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha, mergeable_state: .mergeable_state}')
 
-          # Print the PR number and corresponding merge commit sha
-          echo "PR number and merge commit sha:"
-          echo "$pr_details" | jq -r '. | "PR #\(.number): \(.sha)"'
+          # Print the PR number, merge commit sha, and mergeable state
+          echo "PR number, merge commit sha, and mergeable state:"
+          echo "$pr_details" | jq -r '. | "PR #\(.number): \(.sha), Mergeable State: \(.mergeable_state)"'
 
-          # Create a JSON array string of PR numbers and SHAs
-          pr_details=$(echo "$pr_details" | jq -nc '[inputs | {number: .number, sha: .sha}]')
+          # Create a JSON array string of PR numbers, SHAs, and mergeable states
+          pr_details=$(echo "$pr_details" | jq -nc '[inputs | {number: .number, sha: .sha, mergeable_state: .mergeable_state}]')
           echo "pr_details=$pr_details" >> $GITHUB_ENV
 
-      - name: Get PR details
-        id: pr-details
-        run: |
-          PR_URL="https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}"
-          PR_RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" $PR_URL)
-          echo "::set-output name=mergeable_state::$(echo $PR_RESPONSE | jq -r '.mergeable_state')"
-  
-      - name: Check mergeable state
-        if: steps.pr-details.outputs.mergeable_state == 'dirty'
-        run: echo "Warning:This PR has conflicts. Please resolve conflicts before merging."
+          # Check for mergeable_state "dirty" and set an output if found
+          if echo "$pr_details" | jq -e '.[] | select(.mergeable_state == "dirty")' > /dev/null; then
+            echo "::warning::One or more PRs have conflicts (mergeable_state: dirty)."
+          fi
