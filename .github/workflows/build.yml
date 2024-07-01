@@ -25,8 +25,10 @@ jobs:
             merge_commit_sha=$(echo "$pr" | jq -r '.merge_commit_sha')
             
             # Check if the PR is mergeable
-            mergeable_status=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "${{ env.API_URL }}/$pr_number" | jq -r '.mergeable')
+            pr_detail=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "${{ env.API_URL }}/$pr_number")
+
+            mergeable_status=$(echo "$pr_detail" | jq -r '.mergeable')
             
             # Only include the PR if it is mergeable
             if [ "$mergeable_status" == "true" ]; then
@@ -35,7 +37,7 @@ jobs:
           done
 
           # Create a JSON array string of PR numbers and SHAs
-          pr_details=$(printf "%s\n" "${pr_details_array[@]}" | jq -nc '[inputs]')
+          pr_details=$(printf "%s\n" "${pr_details_array[@]}" | jq -s '.')
           echo "pr_details=$pr_details" >> $GITHUB_OUTPUT
 
           # Print the PR number and corresponding merge commit sha
