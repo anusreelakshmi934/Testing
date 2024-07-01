@@ -36,13 +36,8 @@ jobs:
             fi
           done
 
-          pr_details_array=$(echo "$url" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
-          # pr_details_array=$(echo "$pr_infos" | jq -nc '
-          #   .[]
-          #   | select(.draft == false and .mergeable_state == "clean")
-          #   | "\(env.API_URL)/\(.number)"
-          # ')
-          
+          # Create a JSON array string of PR numbers and SHAs
+          pr_details_array=$(echo "$pr_details" | jq -s '.')
           echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
           
 
