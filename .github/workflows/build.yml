@@ -26,22 +26,27 @@ jobs:
           pr_details=$(echo "$pr_details" | jq -nc '[inputs | {number: .number, sha: .sha}]')
           echo "pr_details=$pr_details" >> $GITHUB_OUTPUT
 
+      - name: Set PR number
+        run: echo "PR_NUMBER=$(jq -r '.number' <<< "$pr_details")" >> $GITHUB_ENV
+      
       - name: Check for merge conflicts
         shell: bash
         env:
           API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
+          PR_NUMBER: ${{ env.PR_NUMBER }}
         run: |
           # Fetch the PR details to get the mergeable status
-          pr_info=$(curl -s "${{ env.API_URL }}/$pr_number")
+          pr_info=$(curl -s "${{ env.API_URL }}/${PR_NUMBER}")
           mergeable_state=$(echo "$pr_info" | jq -r '.mergeable_state')
           
-          echo "Mergeable state for PR #$pr_number: $mergeable_state"
+          echo "Mergeable state for PR #${PR_NUMBER}: ${mergeable_state}"
           
-          if [ "$mergeable_state" == "dirty" ]; then
-            echo "Warning: PR #$pr_number contains a merge conflict!"
+          if [ "${mergeable_state}" == "dirty" ]; then
+            echo "Warning: PR #${PR_NUMBER} contains a merge conflict!"
           else
-            echo "PR #$pr_number is mergeable with state: $mergeable_state"
+            echo "PR #${PR_NUMBER} is mergeable with state: ${mergeable_state}"
           fi
+
 
 
 
