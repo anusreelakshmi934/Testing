@@ -38,6 +38,8 @@ jobs:
             pr_info=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             "${{ env.API_URL }}/$pr_number")
 
+            echo "${{ env.API_URL }}/$pr_number"
+
             mergeable_state=$(jq -r '.mergeable_state' <<< "$pr_info")
             if [[ "$mergeable_state" == "dirty" ]]; then
               echo "PR #$pr_number has merge conflicts."
