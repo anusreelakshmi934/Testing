@@ -58,11 +58,11 @@ jobs:
             os: windows-latest
             reportName: windows-test-report
         pr_details: ${{ fromJson(needs.fetch_all_pull_request_shas.outputs.pr_details) }}
-    name: Run LTI tests for PR #${{ matrix.pr_details_array.number }}
+    name: Run LTI tests for PR #${{ matrix.pr_details.number }}
     steps:
       - name: 'Checkout lsp4ij'
         uses: actions/checkout@v3
         with:
           repository: redhat-developer/lsp4ij
           path: lsp4ij
-          ref: ${{ matrix.pr_details_array.sha }}
+          ref: ${{ matrix.pr_details.sha }}
