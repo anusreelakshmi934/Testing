@@ -39,6 +39,9 @@ jobs:
 
       - name: Fetch PR Details
         run: |
+          # Fetch PR details from the GitHub API
+          pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${{ env.API_URL }}")
+          
           pr_details_array=$(echo "$pr_infos" | jq -r '
             .[]
             | select(.draft == false and .mergeable_state == "clean")
