@@ -18,6 +18,10 @@ jobs:
           
           # Extract PR numbers and merge_commit_sha values, excluding draft pull requests with mergeable_state != "dirty"
           pr_details=$(echo "$pr_infos" | jq -r '.[] | select(.draft == false and .mergeable_state != "dirty") | {number: .number, sha: .merge_commit_sha}')
+          clean=$(echo "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"')
+          clean_pr=$(echo "$clean" | jq -r '.[] | select(.draft == false and .mergeable_state != "dirty") | {number: .number, sha: .merge_commit_sha}')
+          
+          
           
           # Print the PR number and corresponding merge commit sha
           echo "PR number and merge commit sha:"
@@ -36,7 +40,7 @@ jobs:
           done
       
           # Create a JSON array of PR numbers and SHAs
-          pr_details_array=$(echo "$pr_details" | jq -s '.')
+          pr_details_array=$(echo "$clean_pr" | jq -s '.')
           echo "::set-output name=pr_details::$pr_details_array"
           
 
