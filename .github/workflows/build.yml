@@ -26,28 +26,27 @@ jobs:
           pr_details=$(echo "$pr_details" | jq -nc '[inputs | {number: .number, sha: .sha}]')
           echo "pr_details=$pr_details" >> $GITHUB_OUTPUT
 
-      - name: Set PR number
-        run: echo "PR_NUMBER=$(jq -r '.number' <<< "$pr_details")" >> $GITHUB_ENV
-             echo "$pr_details"
-      
-      - name: Check for merge conflicts
-        shell: bash
-        env:
-          API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
-          PR_NUMBER: ${{ env.PR_NUMBER }}
+      - name: Fetch Pull Requests
+        id: fetch_prs
         run: |
-          # Fetch the PR details to get the mergeable status
-          pr_info=$(curl -s "${{ env.API_URL }}/${PR_NUMBER}")
-          mergeable_state=$(echo "$pr_info" | jq -r '.mergeable_state')
-          
-          echo "Mergeable state for PR #${PR_NUMBER}: ${mergeable_state}"
-          
-          if [ "${mergeable_state}" == "dirty" ]; then
-            echo "Warning: PR #${PR_NUMBER} contains a merge conflict!"
+          prs=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "$API_URL")
+          echo "$prs" > prs.json
+  
+      - name: Check for Merge Conflicts
+        id: check_conflicts
+        run: |
+          jq -r '.[] | select(.mergeable == false) | "PR #\(.number) has merge conflicts."' prs.json > conflicts.txt
+          if [ -s conflicts.txt ]; then
+            cat conflicts.txt
+            echo "::set-output name=has_conflicts::true"
           else
-            echo "PR #${PR_NUMBER} is mergeable with state: ${mergeable_state}"
+            echo "No merge conflicts found."
+            echo "::set-output name=has_conflicts::false"
           fi
-
+  
+      - name: Display Warning
+        if: steps.check_conflicts.outputs.has_conflicts == 'true'
+        run: echo "Warning:One or more PRs have merge conflicts. Please resolve them."
 
 
 
