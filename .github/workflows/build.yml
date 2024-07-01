@@ -31,7 +31,7 @@ jobs:
         env:
           API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
         run: |
-          pr_details=${{ steps.extract.outputs.pr_details }}
+          # pr_details=${{ steps.extract.outputs.pr_details }}
           
           # Iterate through each PR and check the mergeable status
           echo "$pr_details" | jq -c '.[]' | while read pr; do
