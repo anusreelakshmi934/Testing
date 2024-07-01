@@ -22,7 +22,7 @@ jobs:
           # Print the PR number and corresponding merge commit sha
           echo "PR number and merge commit sha:"
           echo "$pr_details" | jq -r '. | "PR #\(.number): \(.sha)"'
-          echo "$pr_details" | jq -r '. | "${{ env.API_URL }}\(.number)"'
+          echo "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"'
        
 
           # Create a JSON array string of PR numbers and SHAs
