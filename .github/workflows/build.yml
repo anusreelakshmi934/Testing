@@ -37,8 +37,8 @@ jobs:
           done
 
           # Create a JSON array string of PR numbers and SHAs
-          pr_details_array=$(echo "$pr_details" | jq -s '.')
-          echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
+          pr_details_array=$(echo "$pr_details" | jq -s '[. | split("\n") | map(select(. != "")) | map(fromjson)]')
+          echo "::set-output name=pr_details::$pr_details_array"
           
 
   # Run the LTI Tests against each open lsp4ij PRs
