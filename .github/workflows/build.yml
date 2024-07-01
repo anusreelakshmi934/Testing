@@ -1,32 +1,44 @@
 name: PR notification
 on:
-  issues:
-    types: [opened ]
   push : 
-  pull_request:
-    types: [ opened , reopened ]
 jobs:
-  build:
+  fetch_all_pull_request_shas:
     runs-on: ubuntu-latest
-    name: PR creation
+    outputs:
+      pr_details: ${{ steps.extract.outputs.pr_details }}
+    env:
+      API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
     steps:
-      - name: Send GitHub trigger payload to Slack Workflow Builder
-        id: slack
-        uses: slackapi/slack-github-action@v1.26.0
-        with:
-          payload: |
-            {
-            "text": "GitHub Action PR created: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "GitHub Action PR opened recently: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
-                  }
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+      - name: Extract PR numbers and merge_commit_shas
+        shell: bash
+        id: extract
+        run: |
+          pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "${{ env.API_URL }}")
+
+          # Initialize an empty array for storing PR details
+          pr_details_array=()
+
+          # Extract PR numbers and merge_commit_sha values, excluding draft pull requests and PRs with merge conflicts
+          for pr in $(echo "$pr_infos" | jq -c '.[] | select(.draft == false)'); do
+            pr_number=$(echo "$pr" | jq -r '.number')
+            merge_commit_sha=$(echo "$pr" | jq -r '.merge_commit_sha')
+            
+            # Check if the PR is mergeable
+            mergeable_status=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "${{ env.API_URL }}/$pr_number" | jq -r '.mergeable')
+            
+            # Only include the PR if it is mergeable
+            if [ "$mergeable_status" == "true" ]; then
+              pr_details_array+=("{\"number\": $pr_number, \"sha\": \"$merge_commit_sha\"}")
+            fi
+          done
+
+          # Create a JSON array string of PR numbers and SHAs
+          pr_details=$(printf "%s\n" "${pr_details_array[@]}" | jq -nc '[inputs]')
+          echo "pr_details=$pr_details" >> $GITHUB_OUTPUT
+
+          # Print the PR number and corresponding merge commit sha
+          echo "PR number and merge commit sha without conflicts:"
+          echo "$pr_details" | jq -r '.[] | "PR #\(.number): \(.sha)"'
+
