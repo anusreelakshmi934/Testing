@@ -8,57 +8,40 @@ jobs:
       pr_details: ${{ steps.extract.outputs.pr_details }}
     env:
       API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
-
     steps:
       - name: Extract PR numbers and merge_commit_shas
-        shell: bash
         id: extract
         run: |
           pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
           "${{ env.API_URL }}")
-    
+
           # Extract PR numbers and merge_commit_sha values, excluding draft pull requests
           pr_details=$(echo "$pr_infos" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
-    
+
           # Print the PR number and corresponding merge commit sha
           echo "PR number and merge commit sha:"
           echo "$pr_details" | jq -r '. | "PR #\(.number): \(.sha)"'
-    
+
           # Create a JSON array string of PR numbers and SHAs
           pr_details=$(echo "$pr_details" | jq -nc '[inputs | {number: .number, sha: .sha}]')
-          echo "pr_details=$pr_details" >> $GITHUB_OUTPUT
-    
-      - name: Check for merge conflicts
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          echo "pr_details=$pr_details" >> $GITHUB_ENV
+
+      - name: Check mergeable state of each PR
+        id: check_mergeable_state
         run: |
-          pr_details='${{ steps.extract.outputs.pr_details }}'
-          conflict_found=false
-          for pr in $(echo "$pr_details" | jq -r '.[] | @base64'); do
-            _jq() {
-              echo "${pr}" | base64 --decode | jq -r "${1}"
-            }
-    
-            pr_number=$(_jq '.number')
-            merge_commit_sha=$(_jq '.sha')
-    
-            # Check for merge conflicts
-            conflict_status=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-            "${{ env.API_URL }}/$pr_number/merge" \
-            | jq -r '.message')
-    
-            if [[ "$conflict_status" == "Merge conflict" ]]; then
-              conflict_found=true
-              curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
-              -H "Content-Type: application/json" \
-              -d "{\"body\": \"⚠️ **Warning:** Merge conflicts detected in this pull request.\"}" \
-              "${{ env.API_URL }}/$pr_number/comments"
+          pr_details=$(jq -c '.[]' <<< "${{ steps.extract.outputs.pr_details }}")
+          for pr in $pr_details; do
+            pr_number=$(jq -r '.number' <<< "$pr")
+            pr_sha=$(jq -r '.sha' <<< "$pr")
+
+            # Fetch PR details to check mergeable state
+            pr_info=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "${{ env.API_URL }}/$pr_number")
+
+            mergeable_state=$(jq -r '.mergeable_state' <<< "$pr_info")
+            if [[ "$mergeable_state" == "dirty" ]]; then
+              echo "PR #$pr_number has merge conflicts."
+              # Handle accordingly, e.g., skip processing or take corrective action
             fi
           done
-    
-          if [ "$conflict_found" = true ]; then
-            echo "Some PRs have merge conflicts."
-          else
-            echo "No merge conflicts found."
-          fi
+
