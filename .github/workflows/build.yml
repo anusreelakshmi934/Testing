@@ -7,7 +7,7 @@ jobs:
     outputs:
       pr_details: ${{ steps.extract.outputs.pr_details }}
     env:
-      API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
+      API_URL: https://api.github.com/repos/OpenLiberty/liberty-tools-intellij/pulls
     steps:
       - name: Extract PR numbers and merge_commit_shas 
         shell: bash
@@ -70,6 +70,6 @@ jobs:
       - name: 'Checkout lsp4ij'
         uses: actions/checkout@v4.1.7
         with:
-          repository: redhat-developer/lsp4ij
+          repository: OpenLiberty/liberty-tools-intellij
           path: lsp4ij
           ref: ${{ matrix.pr_details.sha }}
