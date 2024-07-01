@@ -25,7 +25,11 @@ jobs:
        
           # Create a JSON array string of PR numbers and SHAs
           pr_details_array=$(echo "$pr_infos" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
-          echo "::set-output name=pr_details::$pr_details_array"  # Output pr_details_array directly
+          echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
+          
+          # # Create a JSON array string of PR numbers and SHAs
+          # pr_details_array=$(echo "$pr_infos" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
+          # echo "::set-output name=pr_details::$pr_details_array"  # Output pr_details_array directly
 
           # Check if any of the PR URLs contain "mergeable_state": "dirty"
           echo "Checking mergeable state of PRs..."
