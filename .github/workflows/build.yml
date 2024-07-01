@@ -26,31 +26,13 @@ jobs:
           pr_details=$(echo "$pr_details" | jq -nc '[inputs | {number: .number, sha: .sha}]')
           echo "pr_details=$pr_details" >> $GITHUB_ENV
 
-      - name: Check mergeable state for each PR
-        id: check_mergeable_state
+      - name: Get PR details
+        id: pr-details
         run: |
-          # Parse PR details from the previous step
-          pr_details=$(cat $GITHUB_ENV | jq -r '.pr_details')
-
-          # Loop through each PR and check mergeable state
-          for pr in $(echo "$pr_details" | jq -r '.[] | @base64'); do
-            _jq() {
-              echo ${pr} | base64 --decode | jq -r ${1}
-            }
-
-            pr_number=$(_jq '.number')
-            pr_sha=$(_jq '.sha')
-
-            # Fetch detailed PR information including mergeable state
-            pr_info=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/redhat-developer/lsp4ij/pulls/${pr_number}")
-
-            mergeable_state=$(echo "$pr_info" | jq -r '.mergeable_state')
-
-            # Check if mergeable state is dirty
-            if [ "$mergeable_state" == "dirty" ]; then
-              echo "Warning: PR #$pr_number has merge conflicts (mergeable_state: dirty)"
-              # Optionally, you can handle or log this warning as needed
-            fi
-          }
-
+          PR_URL="https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}"
+          PR_RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" $PR_URL)
+          echo "::set-output name=mergeable_state::$(echo $PR_RESPONSE | jq -r '.mergeable_state')"
+  
+      - name: Check mergeable state
+        if: steps.pr-details.outputs.mergeable_state == 'dirty'
+        run: echo "Warning:This PR has conflicts. Please resolve conflicts before merging."
