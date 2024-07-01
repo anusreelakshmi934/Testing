@@ -29,24 +29,9 @@ jobs:
       - name: Fetch Pull Requests
         id: fetch_prs
         run: |
-          prs=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "$API_URL")
-          echo "$prs" > prs.json
-  
-      - name: Check for Merge Conflicts
-        id: check_conflicts
-        run: |
-          jq -r '.[] | select(.mergeable == false) | "PR #\(.number) has merge conflicts."' prs.json > conflicts.txt
-          if [ -s conflicts.txt ]; then
-            cat conflicts.txt
-            echo "::set-output name=has_conflicts::true"
-          else
-            echo "No merge conflicts found."
-            echo "::set-output name=has_conflicts::false"
-          fi
-  
-      - name: Display Warning
-        if: steps.check_conflicts.outputs.has_conflicts == 'true'
-        run: echo "Warning:One or more PRs have merge conflicts. Please resolve them."
+          PR_URL=$(echo "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"')
+          echo "PR_URL"
+
 
 
 
