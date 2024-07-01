@@ -7,7 +7,7 @@ jobs:
     outputs:
       pr_details: ${{ steps.extract.outputs.pr_details }}
     env:
-      API_URL: https://api.github.com/repos/OpenLiberty/liberty-tools-intellij/pulls
+      API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
     steps:
       - name: Extract PR numbers and merge_commit_shas 
         shell: bash
@@ -36,12 +36,12 @@ jobs:
             fi
           done
 
-          # pr_details_array=$(echo "$pr_infos" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
-          pr_details_array=$(echo "$pr_infos" | jq -nc '
-            .[]
-            | select(.draft == false and .mergeable_state == "clean")
-            | "\(env.API_URL)/\(.number)"
-          ')
+          pr_details_array=$(echo "$pr_urls" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
+          # pr_details_array=$(echo "$pr_infos" | jq -nc '
+          #   .[]
+          #   | select(.draft == false and .mergeable_state == "clean")
+          #   | "\(env.API_URL)/\(.number)"
+          # ')
           
           echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
           
@@ -70,6 +70,6 @@ jobs:
       - name: 'Checkout lsp4ij'
         uses: actions/checkout@v4.1.7
         with:
-          repository: OpenLiberty/liberty-tools-intellij
+          repository: redhat-developer/lsp4ij
           path: lsp4ij
           ref: ${{ matrix.pr_details.sha }}
