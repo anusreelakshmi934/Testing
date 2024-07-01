@@ -9,7 +9,7 @@ jobs:
     env:
       API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
     steps:
-      - name: Extract PR numbers and merge_commit_shas
+      - name: Extract PR numbers and merge commit shas
         id: extract
         run: |
           pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
@@ -26,24 +26,31 @@ jobs:
           pr_details=$(echo "$pr_details" | jq -nc '[inputs | {number: .number, sha: .sha}]')
           echo "pr_details=$pr_details" >> $GITHUB_ENV
 
-      - name: Check mergeable state of each PR
+      - name: Check mergeable state for each PR
         id: check_mergeable_state
         run: |
-          pr_details=$(jq -c '.[]' <<< "${{ steps.extract.outputs.pr_details }}")
-          for pr in $pr_details; do
-            pr_number=$(jq -r '.number' <<< "$pr")
-            pr_sha=$(jq -r '.sha' <<< "$pr")
+          # Parse PR details from the previous step
+          pr_details=$(cat $GITHUB_ENV | jq -r '.pr_details')
 
-            # Fetch PR details to check mergeable state
+          # Loop through each PR and check mergeable state
+          for pr in $(echo "$pr_details" | jq -r '.[] | @base64'); do
+            _jq() {
+              echo ${pr} | base64 --decode | jq -r ${1}
+            }
+
+            pr_number=$(_jq '.number')
+            pr_sha=$(_jq '.sha')
+
+            # Fetch detailed PR information including mergeable state
             pr_info=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "${{ env.API_URL }}/$pr_number")
+            "https://api.github.com/repos/redhat-developer/lsp4ij/pulls/${pr_number}")
 
-            echo "${{ env.API_URL }}/$pr_number"
+            mergeable_state=$(echo "$pr_info" | jq -r '.mergeable_state')
 
-            mergeable_state=$(jq -r '.mergeable_state' <<< "$pr_info")
-            if [[ "$mergeable_state" == "dirty" ]]; then
-              echo "PR #$pr_number has merge conflicts."
-              # Handle accordingly, e.g., skip processing or take corrective action
+            # Check if mergeable state is dirty
+            if [ "$mergeable_state" == "dirty" ]; then
+              echo "Warning: PR #$pr_number has merge conflicts (mergeable_state: dirty)"
+              # Optionally, you can handle or log this warning as needed
             fi
-          done
+          }
 
