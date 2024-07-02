@@ -28,29 +28,12 @@ jobs:
 
           # Check if any of the PR contain merge conflicts
           echo "Checking mergeable state of PRs..."
-          pr_urls=$(echo "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"')
-          output_json='['
           
+          pr_urls=$(echo "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"')
           for url in $pr_urls; do
               pr_detail=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
-              draft=$(echo "$pr_detail" | jq -r '.draft')
-              mergeable_state=$(echo "$pr_detail" | jq -r '.mergeable_state')
-          
-              if [ "$draft" == "false" ] && [ "$mergeable_state" == "clean" ]; then
-                  pr_number=$(echo "$pr_detail" | jq -r '.number')
-                  merge_commit_sha=$(echo "$pr_detail" | jq -r '.merge_commit_sha')
-          
-                  # Append to output_json in JSON array format
-                  output_json+='{"number": "'$pr_number'", "merge_commit_sha": "'$merge_commit_sha'"},'
-              fi
-          done
-          
-          # Remove the trailing comma and close the JSON array
-          output_json=${output_json%?}
-          output_json+=']'
-          
-          # Append output_json to specified output file ($GITHUB_OUTPUT)
-          echo "$output_json" >> "$GITHUB_OUTPUT"
+              pr_details_array=$(echo "$pr_detail" | jq -nc '[inputs | .[] | select(.draft == false and .mergeable_state == "clean") | {number: .number, sha: .merge_commit_sha}]')
+              echo "pr_details=$pr_details_array" >> "$GITHUB_OUTPUT"
 
           # Check if pr_details_array is empty
           if [ $(echo "$pr_details_array" | jq length) -eq 0 ]; then
