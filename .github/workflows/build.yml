@@ -39,7 +39,7 @@ jobs:
 
           for url in $pr_urls; do
             pr=$(echo "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"')
-            echo "pr"
+            echo "$pr"
             onlymergeable=$(echo "$pr" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
           done
           
