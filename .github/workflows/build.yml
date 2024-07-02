@@ -30,25 +30,23 @@ jobs:
           for url in $pr_urls; do
             pr_detail=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
             mergeable_state=$(echo "$pr_detail" | jq -r '.mergeable_state')
-            if [ "$mergeable_state" == "dirty" ]; then
-              pr_number=$(echo "$pr_detail" | jq -r '.number')
-              echo "##[warning] PR #$pr_number has a merge conflict."
-            fi
+            echo "PR number and mergeable_state:"
+            echo "$pr_details" | jq -r '. | "PR #\(.number): \('.mergeable_state')"'
           done
 
           
-          # Fetch PR details from the GitHub API
-          pr_detail=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
+          # # Fetch PR details from the GitHub API
+          # pr_detail=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
           
-          # Extract PR numbers and merge_commit_sha values, excluding draft pull requests
-          pr_details=$(echo "$pr_detail" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .mergeable_state}')
+          # # Extract PR numbers and merge_commit_sha values, excluding draft pull requests
+          # pr_details=$(echo "$pr_detail" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .mergeable_state}')
           
-          # # Print the PR number and corresponding merge commit sha
-          # echo "PR number and merge commit sha:"
-          # echo "$pr_details" | jq -r '. | "PR #\(.number): \(.sha)"'
+          # # # Print the PR number and corresponding merge commit sha
+          # # echo "PR number and merge commit sha:"
+          # # echo "$pr_details" | jq -r '. | "PR #\(.number): \(.sha)"'
           
-          echo "PR number and mergeable_state:"
-          echo "$pr_details" | jq -r '. | "PR #\(.number): \('.sha')"'
+          # echo "PR number and mergeable_state:"
+          # echo "$pr_details" | jq -r '. | "PR #\(.number): \('.sha')"'
 
 
           
