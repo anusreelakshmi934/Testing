@@ -37,22 +37,28 @@ jobs:
             fi
           done
 
-          # Initialize an empty array
-          pr_shas=()
+          # # Initialize an empty array
+          # pr_shas=()
           
-          # Loop through each URL in $pr_urls
-          for url in $pr_urls; do
-              echo "Fetching from URL: $url"
-              # Fetch the PR information
-              merge=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
+          # # Loop through each URL in $pr_urls
+          # for url in $pr_urls; do
+          #     echo "Fetching from URL: $url"
+          #     # Fetch the PR information
+          #     merge=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
               
-              # Check if the PR is not a draft and mergeable_state is clean
-              if [[ $(echo "$merge" | jq '.draft, .mergeable_state') == "false \"clean\"" ]]; then
-                  # Extract and add the SHA to the array
-                  pr_shas+=($(echo "$merge" | jq -r '.merge_commit_sha'))
-              fi
-          done
-          echo "pr: $pr_shas"
+          #     # Check if the PR is not a draft and mergeable_state is clean
+          #     if [[ $(echo "$merge" | jq '.draft, .mergeable_state') == "false \"clean\"" ]]; then
+          #         # Extract and add the SHA to the array
+          #         pr_shas+=($(echo "$merge" | jq -r '.merge_commit_sha'))
+          #     fi
+          # done
+          # echo "pr: $pr_shas"
+
+          # Create an array of PR details excluding draft PRs
+          pr_details_array=$(echo "$merge" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
+          
+          # Output the array to a GitHub Actions output file
+          echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
 
           # Check if pr_details_array is empty
           if [ $(echo "$pr_details_array" | jq length) -eq 0 ]; then
