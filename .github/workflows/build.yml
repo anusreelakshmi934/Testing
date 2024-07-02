@@ -32,15 +32,11 @@ jobs:
             if [ "$mergeable_state" == "dirty" ]; then
               pr_number=$(echo "$pr_detail" | jq -r '.number')
               echo "##[warning] PR #$pr_number has a merge conflict."
+              pr_details_array=$(echo "$url" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
+              echo "pr_details_array=$pr_details_array" >> $GITHUB_OUTPUT
             fi
           done
       
-          # Example of iterating through pr_details_array if needed
-          for url in $pr_urls; do
-            pr_details_array=$(echo "$url" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
-            echo "pr_details_array=$pr_details_array" >> $GITHUB_OUTPUT
-          done
-
 
   # Run the LTI Tests against each open lsp4ij PRs
   call-build-workflow-for-each-merge-commit-sha:
