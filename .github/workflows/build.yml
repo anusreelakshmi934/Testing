@@ -61,6 +61,7 @@ jobs:
             echo "is_empty=true" >> $GITHUB_OUTPUT
           else
             echo "pr_details is not empty"
+            echo "$pr_details_array"
             echo "is_empty=false" >> $GITHUB_OUTPUT
           fi
 
