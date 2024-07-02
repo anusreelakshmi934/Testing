@@ -34,6 +34,7 @@ jobs:
               pr_detail=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
               pr_details_array=$(echo "$pr_detail" | jq -nc '[inputs | .[] | select(.draft == false and .mergeable_state == "clean") | {number: .number, sha: .merge_commit_sha}]')
               echo "pr_details=$pr_details_array" >> "$GITHUB_OUTPUT"
+          done
 
           # Check if pr_details_array is empty
           if [ $(echo "$pr_details_array" | jq length) -eq 0 ]; then
