@@ -17,7 +17,7 @@ jobs:
           pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${{ env.API_URL }}")
           
           # Extract PR numbers and merge_commit_sha values, excluding draft pull requests with mergeable_state != "dirty"
-          pr_details=$(echo "$pr_infos" | jq '[.[] | select(.draft == false and .mergeable_state != "dirty") | {number: .number, sha: .merge_commit_sha}]')
+          pr_details=$(echo "$pr_infos" | jq -r '[.[] | select(.draft == false and .mergeable_state != "dirty") | {number: .number, sha: .merge_commit_sha}]')
           
           # Initialize an empty JSON array string
           json_array="[]"
@@ -30,8 +30,10 @@ jobs:
             if [ "$mergeable_state" != "dirty" ]; then
               pr_number=$(echo "$pr_detail" | jq -r '.number')
               pr_sha=$(echo "$pr_detail" | jq -r '.merge_commit_sha')
-              # Append the PR number and SHA to the JSON array
-              json_array=$(echo "$json_array" | jq --argjson pr "{number: $pr_number, sha: \"$pr_sha\"}" '. + [$pr]')
+              # Create a JSON object for the PR number and SHA
+              pr_json=$(jq -n --arg number "$pr_number" --arg sha "$pr_sha" '{number: $number, sha: $sha}')
+              # Append the JSON object to the JSON array
+              json_array=$(echo "$json_array" | jq --argjson pr "$pr_json" '. + [$pr]')
             fi
           done
           
