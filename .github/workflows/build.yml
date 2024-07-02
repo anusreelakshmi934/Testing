@@ -8,7 +8,7 @@ jobs:
       pr_details: ${{ steps.extract.outputs.pr_details }}
       is_empty: ${{ steps.extract.outputs.is_empty }}
     env:
-      API_URL: https://api.github.com/repos/OpenLiberty/liberty-tools-intellij/pulls
+      API_URL: https://api.github.com/repos/OpenLiberty/liberty-tools-vscode/pulls
     name: PR Details
     steps:
       - name: Extract PR numbers and merge_commit_shas 
@@ -97,7 +97,7 @@ jobs:
       - name: 'Checkout lsp4ij'
         uses: actions/checkout@v4.1.7
         with:
-          repository: OpenLiberty/liberty-tools-intellij
+          repository: OpenLiberty/liberty-tools-vscode
           path: lsp4ij
           ref: ${{ matrix.pr_details.sha }}
   
