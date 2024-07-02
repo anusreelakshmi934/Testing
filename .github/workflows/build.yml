@@ -10,7 +10,6 @@ jobs:
       API_URL: https://api.github.com/repos/redhat-developer/lsp4ij/pulls
     
     steps:
-      steps:
       - name: Extract PR numbers and merge_commit_shas 
         shell: bash
         id: extract
