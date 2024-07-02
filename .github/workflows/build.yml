@@ -38,7 +38,7 @@ jobs:
 
           echo "PR number and mergeable_state:"
           for url in $pr_urls; do
-            echo "$pr_detail" | jq -r '. | "PR #\(.number): \('.mergeable_state')"'
+            echo "$pr_detail" | jq -r '. | "PR #\($pr_number): \('.mergeable_state')"'
           done
 
           
