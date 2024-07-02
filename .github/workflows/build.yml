@@ -41,7 +41,8 @@ jobs:
           
           for url in $pr_urls; do
             merge=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
-            pr_details_array=$(echo "$merge" | jq -r '.[] | select(.draft == false and .mergeable_state == "clean" ) | {number: .number, sha: .merge_commit_sha}]')
+            echo "$merge"
+            pr_details_array=$(echo "$merge" | jq -nc '[inputs | .[] | select(.draft == false and .mergeable_state == "clean" ) | {number: .number, sha: .merge_commit_sha}]')
           done
 
           echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
