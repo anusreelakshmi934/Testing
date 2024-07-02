@@ -38,12 +38,13 @@ jobs:
           done
 
           # Create a JSON array string of PR numbers and SHAs
+          echo "$pr_infos" 
           pr_details_array=$(echo "$pr_infos" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
-          pr=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
-          onlymergeable=$(echo "$pr" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
+          # pr=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
+          # onlymergeable=$(echo "$pr" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
           
           # Check if pr_details_array is empty
-          if [ $(echo "$onlymergeable" | jq length) -eq 0 ]; then
+          if [ $(echo "$pr_details_array" | jq length) -eq 0 ]; then
             echo "pr_details is empty"
             echo "is_empty=true" >> $GITHUB_OUTPUT
           else
@@ -51,7 +52,7 @@ jobs:
             echo "is_empty=false" >> $GITHUB_OUTPUT
           fi
 
-          echo "pr_details=$onlymergeable" >> $GITHUB_OUTPUT
+          echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
 
   # Run the LTI Tests against each open lsp4ij PRs
   call-build-workflow-for-each-merge-commit-sha:
