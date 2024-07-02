@@ -29,12 +29,13 @@ jobs:
           for url in $pr_urls; do
             pr_detail=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
             mergeable_state=$(echo "$pr_detail" | jq -r '.mergeable_state')
+            echo "$pr_details" | jq -r '. | "PR #\(.mergeable_state)"'
             if [ "$mergeable_state" == "dirty" ]; then
               pr_number=$(echo "$pr_detail" | jq -r '.number')
               echo "##[warning] PR #$pr_number has a merge conflict."
               pr=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
               pr_details=$(echo "$pr" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
-              echo "$pr_details" | jq -r '. | "PR #\(.mergeable_state)"'
+    
               # pr_details_array=$(echo "$url" jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
               echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
             fi
