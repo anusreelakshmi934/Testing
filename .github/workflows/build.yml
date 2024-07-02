@@ -32,11 +32,11 @@ jobs:
             pr_detail=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
             mergeable_state=$(echo "$pr_detail" | jq -r '.mergeable_state')
             echo "$pr_detail" | jq -r '. | "PR #\(.number): \(.mergeable_state)"'
-            pr_details_array=$(echo "$pr_detail" | jq -nc '[inputs | .[] | select(.draft == false and .mergeable_state == "clean") | {number: .number, sha: .merge_commit_sha}]')
             if [ "$mergeable_state" == "dirty" ]; then
               pr_number=$(echo "$pr_detail" | jq -r '.number')
               echo "##[warning] PR #$pr_number has a merge conflict."
             fi
+            pr_details_array=$(echo "$pr_detail" | jq -nc '[inputs | .[] | select(.draft == false and .mergeable_state == "clean") | {number: .number, sha: .merge_commit_sha}]')
           done
 
           
