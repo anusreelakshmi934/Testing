@@ -37,7 +37,11 @@ jobs:
           done
 
           echo "PR number and mergeable_state:"
-          echo "$pr_detail" | jq -r '. | "PR #\(.number): \('.mergeable_state')"'
+          for url in $pr_urls; do
+            echo "$pr_detail" | jq -r '. | "PR #\(.number): \('.mergeable_state')"'
+          done
+
+          
 
 
   # Run the LTI Tests against each open lsp4ij PRs
