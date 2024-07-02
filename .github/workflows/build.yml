@@ -39,6 +39,15 @@ jobs:
               echo "##[warning] PR #$pr_number has a merge conflict."
             fi
           done
+
+          # Check if pr_details_array is empty
+          if [ $(echo "$pr_details_array" | jq length) -eq 0 ]; then
+            echo "pr_details is empty"
+            echo "is_empty=true" >> $GITHUB_OUTPUT
+          else
+            echo "pr_details is not empty"
+            echo "is_empty=false" >> $GITHUB_OUTPUT
+          fi
   
   # Run the LTI Tests against each open lsp4ij PRs
   call-build-workflow-for-each-merge-commit-sha:
