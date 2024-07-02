@@ -41,19 +41,22 @@ jobs:
           
           
           
-          echo "PR URLs:"
-          echo "$pr_urls"
+         
           
-          pr_details_array=()
+          # Initialize an empty array
+          pr_shas=()
           
+          # Loop through each URL in $pr_urls
           for url in $pr_urls; do
               echo "Fetching from URL: $url"
+              # Fetch the PR information
               merge=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
-              echo "Response from GitHub:"
-              echo "$merge"
               
-              # Assuming your JSON parsing with jq is correct
-              pr_details_array+=$(echo "$merge" | jq -nc '[inputs | .[] | select(.draft == false and .mergeable_state == "clean") | {number: .number, sha: .merge_commit_sha}]')
+              # Check if the PR is not a draft and mergeable_state is clean
+              if [[ $(echo "$merge" | jq '.draft, .mergeable_state') == "false \"clean\"" ]]; then
+                  # Extract and add the SHA to the array
+                  pr_shas+=($(echo "$merge" | jq -r '.merge_commit_sha'))
+              fi
           done
           
           echo "Final PR Details Array:"
