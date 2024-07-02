@@ -38,9 +38,10 @@ jobs:
           done
 
           # Create a JSON array string of PR numbers and SHAs
-          echo "$pr_infos" 
+          pr=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
+          echo "$pr" 
           pr_details_array=$(echo "$pr_infos" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
-          # pr=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
+          
           # onlymergeable=$(echo "$pr" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
           
           # Check if pr_details_array is empty
