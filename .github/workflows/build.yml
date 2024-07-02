@@ -24,7 +24,7 @@ jobs:
           echo "$pr_details" | jq -r '. | "PR #\(.number): \(.sha)"'
     
           # Check if any of the PR contain merge conflicts
-          echo "Checking mergeable state of PRs..."
+          echo "Checking mergeable state of PRs...."
           pr_urls=$(echo "$pr_infos" | jq -r '.[] | select(.draft == false) | "\(.url)"')
           echo "PR number and mergeable_state:"
           for url in $pr_urls; do
