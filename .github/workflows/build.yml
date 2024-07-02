@@ -39,9 +39,28 @@ jobs:
             fi
           done
       
+          # Initialize an empty JSON array string
+          json_array="[]"
+          
+          echo "Checking mergeable state of PRs..."
+          pr_urls=$(echo "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"')
+          for url in $pr_urls; do
+            pr_detail=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
+            mergeable_state=$(echo "$pr_detail" | jq -r '.mergeable_state')
+            if [ "$mergeable_state" != "dirty" ]; then
+              pr_number=$(echo "$pr_detail" | jq -r '.number')
+              pr_sha=$(echo "$pr_detail" | jq -r '.merge_commit_sha')
+              # Append the PR number and SHA to the JSON array
+              json_array=$(echo "$json_array" | jq --argjson pr "{number: $pr_number, sha: \"$pr_sha\"}" '. + [$pr]')
+            fi
+          done
+          
+          # Output the JSON array string
+          echo "JSON array of PRs without merge conflicts: $json_array"
+
           # Create a JSON array of PR numbers and SHAs
-          pr_details_array=$(echo "$clean_pr" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
-          echo "::set-output name=pr_details::$pr_details_array"
+          # pr_details_array=$(echo "$clean_pr" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
+          echo "::set-output name=pr_details::$$json_array"
           
 
   # Run the LTI Tests against each open lsp4ij PRs
