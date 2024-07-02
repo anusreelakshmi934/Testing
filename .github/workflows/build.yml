@@ -48,6 +48,9 @@ jobs:
           echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
 
           
+          # Print PR details
+          echo "PR Details: $pr_details_array"
+          
           # Check if pr_details_array is empty
           if [ $(echo "$pr_details_array" | jq length) -eq 0 ]; then
             echo "pr_details is empty"
@@ -56,6 +59,15 @@ jobs:
             echo "pr_details is not empty"
             echo "is_empty=false" >> $GITHUB_OUTPUT
           fi
+
+          # # Check if pr_details_array is empty
+          # if [ $(echo "$pr_details_array" | jq length) -eq 0 ]; then
+          #   echo "pr_details is empty"
+          #   echo "is_empty=true" >> $GITHUB_OUTPUT
+          # else
+          #   echo "pr_details is not empty"
+          #   echo "is_empty=false" >> $GITHUB_OUTPUT
+          # fi
 
 
   # Run the LTI Tests against each open lsp4ij PRs
