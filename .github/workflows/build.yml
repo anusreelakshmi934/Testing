@@ -15,7 +15,6 @@ jobs:
         run: |
           # Fetch PR details from the GitHub API
           pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${{ env.API_URL }}")
-          pr_detail=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
           
           # Extract PR numbers and merge_commit_sha values, excluding draft pull requests
           pr_details=$(echo "$pr_infos" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
@@ -40,6 +39,7 @@ jobs:
           done
 
           # Create a JSON array string of PR numbers and SHAs
+          pr_detail=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
           pr_details_array=$(echo "$pr_detail" | jq -nc '[inputs | .[] | select(.draft == false and .mergeable_state == "clean") | {number: .number, sha: .merge_commit_sha}]')
           echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
           
