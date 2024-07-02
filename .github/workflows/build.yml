@@ -53,7 +53,7 @@ jobs:
               echo "$merge"
               
               # Assuming your JSON parsing with jq is correct
-              pr_details_array+=$(echo "$merge" | jq -nc '[inputs | select(.draft == false and .mergeable_state == "clean") | {number: .number, sha: .merge_commit_sha}]')
+              pr_details_array+=$(echo "$merge" | jq -nc '[inputs | .[] | select(.draft == false and .mergeable_state == "clean") | {number: .number, sha: .merge_commit_sha}]')
           done
           
           echo "Final PR Details Array:"
