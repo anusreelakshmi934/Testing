@@ -27,7 +27,7 @@ jobs:
           
           # Check if any of the PRs contain merge conflicts
           echo "Checking mergeable state of PRs..."
-          pr_urls=$(echo "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"')
+          pr_urls=$(echo "$pr_details" | jq -r '.number | "'$API_URL'/" + tostring')
           for url in $pr_urls; do
             pr_detail=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
             mergeable_state=$(echo "$pr_detail" | jq -r '.mergeable_state')
