@@ -27,18 +27,20 @@ jobs:
           # Check if any of the PR contain merge conflicts
           echo "Checking mergeable state of PRs..."
           pr_urls=$(echo "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"')
+          echo "PR number and mergeable_state:"
           for url in $pr_urls; do
             pr_detail=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
             mergeable_state=$(echo "$pr_detail" | jq -r '.mergeable_state')
+            echo "$pr_detail" | jq -r '. | "PR #\(.number): \(.mergeable_state)"'
             if [ "$mergeable_state" == "dirty" ]; then
               pr_number=$(echo "$pr_detail" | jq -r '.number')
               echo "##[warning] PR #$pr_number has a merge conflict."
             fi
           done
 
-          # Create a JSON array string of PR numbers and SHAs
-          pr_details_array=$(echo "$pr_infos" | jq -r '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
-          echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
+          # # Create a JSON array string of PR numbers and SHAs
+          # pr_details_array=$(echo "$pr_infos" | jq -r '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
+          # echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
 
   # Run the LTI Tests against each open lsp4ij PRs
   call-build-workflow-for-each-merge-commit-sha:
