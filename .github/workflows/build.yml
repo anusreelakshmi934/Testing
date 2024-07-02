@@ -37,13 +37,17 @@ jobs:
             fi
           done
 
-          for url in $pr_urls; do
-            pr=$(echo "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"')
-            echo "$pr"
-            onlymergeable=$(echo "$pr" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
-          done
+          pr=$(echo "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"')
+          echo "$pr"
+
+          # for url in $pr_urls; do
+          #   pr=$(echo "$pr_details" | jq -r '. | "${{ env.API_URL }}/\(.number)"')
+          #   echo "$pr"
+          #   onlymergeable=$(echo "$pr" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
+          # done
           
           # Create a JSON array string of PR numbers and SHAs
+          # merge=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$pr")
           # pr_details_array=$(echo "$pr_infos" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
           
           
