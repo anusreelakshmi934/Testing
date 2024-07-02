@@ -34,6 +34,13 @@ jobs:
             echo "$pr_detail" | jq -r '. | "PR #\(.number): \(.mergeable_state)"'
           done
 
+
+          echo"################"
+          pr_detail=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
+          mergeable_state=$(echo "$pr_detail" | jq -r '.mergeable_state')
+          echo "PR number and mergeable_state:"
+          echo "$pr_detail" | jq -r '. | "PR #\(.number): \(.mergeable_state)"'
+
           
           # # Fetch PR details from the GitHub API
           # pr_detail=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
