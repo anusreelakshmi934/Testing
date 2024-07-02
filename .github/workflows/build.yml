@@ -36,9 +36,7 @@ jobs:
             fi
           done
 
-          # Create a JSON array string of PR numbers and SHAs
-          # pr_data=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "$url")
-          pr_details_array=$(echo "$url" | jq -r '.[] | select(.draft == false) | {number: .number, merge_commit_sha: .merge_commit_sha}')
+          pr_details_array=$(echo "$url" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
           echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
 
   # Run the LTI Tests against each open lsp4ij PRs
