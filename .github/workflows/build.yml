@@ -38,6 +38,7 @@ jobs:
           done
 
           # Create an array of PR details excluding draft PRs
+          merge=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url")
           pr_details_array=$(echo "$merge" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
           echo "$merge"
 
