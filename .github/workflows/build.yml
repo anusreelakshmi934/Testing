@@ -19,7 +19,7 @@ jobs:
           pr_infos=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${{ env.API_URL }}")
           
           # Extract PR numbers and merge_commit_sha values, excluding draft pull requests
-          pr_details=$(echo "$pr_infos" | jq -r '.[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
+          pr_details=$(echo "$pr_infos" | jq -r '.[] | select(.draft == true) | {number: .number, sha: .merge_commit_sha}')
           
           # Print the PR number and corresponding merge commit sha
           echo "PR number and merge commit sha:"
@@ -38,7 +38,7 @@ jobs:
           done
 
           # Create a JSON array string of PR numbers and SHAs
-          pr_details_array=$(echo "$pr_infos" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
+          pr_details_array=$(echo "$pr_infos" | jq -nc '[inputs | .[] | select(.draft == true) | {number: .number, sha: .merge_commit_sha}]')
           
           # Check if pr_details_array is empty
           if [ $(echo "$pr_details_array" | jq length) -eq 0 ]; then
