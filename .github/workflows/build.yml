@@ -32,7 +32,7 @@ jobs:
             if [ "$mergeable_state" == "dirty" ]; then
               pr_number=$(echo "$pr_detail" | jq -r '.number')
               echo "##[warning] PR #$pr_number has a merge conflict."
-              pr_details_array=$(echo "$pr_detail" jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
+              pr_details_array=$(echo "$url" jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}')
               echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
             fi
           done
