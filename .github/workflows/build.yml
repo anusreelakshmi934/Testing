@@ -51,7 +51,7 @@ jobs:
           done
           
           echo "PR Details Array:"
-          echo "${pr_details_array[@]}"
+          echo "${pr_details_array}"
 
           # # Create a JSON array string of PR numbers and SHAs
           # pr_details_array=$(echo "$pr_infos" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
