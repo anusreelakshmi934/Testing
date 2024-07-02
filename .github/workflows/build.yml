@@ -42,6 +42,9 @@ jobs:
 
           # Set the output
           echo "::set-output name=pr_details::$json_array"
+          
+          # Debugging output
+          echo "##[debug] PR details JSON: $json_array"
 
   # Run the LTI Tests against each open lsp4ij PRs
   call-build-workflow-for-each-merge-commit-sha:
