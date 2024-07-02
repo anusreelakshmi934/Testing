@@ -60,6 +60,8 @@ jobs:
           # Output the array to a GitHub Actions output file
           echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
 
+          echo "$pr_details_array"
+
           # Check if pr_details_array is empty
           if [ $(echo "$pr_details_array" | jq length) -eq 0 ]; then
             echo "pr_details is empty"
