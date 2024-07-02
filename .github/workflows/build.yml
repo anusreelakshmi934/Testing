@@ -34,11 +34,13 @@ jobs:
               pr_number=$(echo "$pr_detail" | jq -r '.number')
               echo "##[warning] PR #$pr_number has a merge conflict."
             fi
+            echo "$url"
           done
 
-          # Create a JSON array string of PR numbers and SHAs
-          pr_details_array=$(echo "$pr_infos" | jq -nc '[inputs | .[] | select(.draft == false) | {number: .number, sha: .merge_commit_sha}]')
-          echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
+          # # Create a JSON array string of PR numbers and SHAs
+          # pr_data=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "YOUR_API_URL")
+          # pr_details_array=$(echo "$pr_data" | jq -r '.[] | select(.draft == false) | {number: .number, merge_commit_sha: .merge_commit_sha}')
+          # echo "pr_details=$pr_details_array" >> $GITHUB_OUTPUT
 
   # Run the LTI Tests against each open lsp4ij PRs
   call-build-workflow-for-each-merge-commit-sha:
