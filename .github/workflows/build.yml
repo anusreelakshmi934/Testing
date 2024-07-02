@@ -37,12 +37,6 @@ jobs:
             fi
           done
 
-         
-          
-          
-          
-         
-          
           # Initialize an empty array
           pr_shas=()
           
@@ -58,11 +52,8 @@ jobs:
                   pr_shas+=($(echo "$merge" | jq -r '.merge_commit_sha'))
               fi
           done
-          
-          echo "Final PR Details Array:"
-          echo "$pr_details_array"
+          echo "$pr_shas"
 
-    
           # Check if pr_details_array is empty
           if [ $(echo "$pr_details_array" | jq length) -eq 0 ]; then
             echo "pr_details is empty"
