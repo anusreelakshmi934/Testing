@@ -49,7 +49,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runtime: [ linux, mac, windows ]
+        runtime: ${{ if(needs.fetch_all_pull_request_shas.outputs.pr_details != 'null' && needs.fetch_all_pull_request_shas.outputs.pr_details != '{}', [ 'linux', 'mac', 'windows' ], []) }}
         include:
           - runtime: linux
             os: ubuntu-latest
@@ -69,3 +69,4 @@ jobs:
           repository: redhat-developer/lsp4ij
           path: lsp4ij
           ref: ${{ matrix.pr_details.sha }}
+
